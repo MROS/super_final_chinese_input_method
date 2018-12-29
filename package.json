@@ -1,0 +1,26 @@
+{
+  "name": "super_final_chinese_input_method",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "@types/express": "^4.16.0",
+    "@types/node": "^10.12.18",
+    "express": "^4.16.4",
+    "typescript": "^3.2.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "start": "tsc server.ts; node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MROS/super_final_chinese_input_method.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MROS/super_final_chinese_input_method/issues"
+  },
+  "homepage": "https://github.com/MROS/super_final_chinese_input_method#readme"
+}
