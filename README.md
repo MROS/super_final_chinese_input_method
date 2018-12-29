@@ -1,2 +1,1 @@
-# super_final_chinese_input_method
-超終極中文輸入法
+# 超終極中文輸入法
