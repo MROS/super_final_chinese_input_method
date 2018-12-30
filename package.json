@@ -11,7 +11,7 @@
   },
   "devDependencies": {},
   "scripts": {
-    "start": "tsc server.ts; node server.js"
+    "start": "tsc server.ts --lib ES6; node server.js"
   },
   "repository": {
     "type": "git",
