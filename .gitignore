@@ -2,4 +2,5 @@
 *.js
 *.jsx
 .*.swp
+npm-debug.log
 **/.cache/**

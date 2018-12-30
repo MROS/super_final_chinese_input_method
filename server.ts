@@ -8,4 +8,5 @@ app.use(express.static("frontend/dist"));
 app.get("/", function(req, res) {
 	res.sendFile(path.resolve("frontend/dist/index.html"));
 });
+
 app.listen(80);
