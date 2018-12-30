@@ -3,57 +3,76 @@ import { Component } from "react";
 import { render } from "react-dom";
 
 import BOPOMOFO_TABLE from "./bopomofo_table";
-import { 注音 } from "../basic"
+import { 輸入單元, 輸入單元種類, 選字單元 } from "../basic"
 
 type IndexState = {
-    txt_content: string,
+    input_unit_list: Array<輸入單元>,
+    txt_final_content_list: Array<string>,
+    txt_typing_content: string,
+    grouped_seq: Array<選字單元> // 全都是注音表示
 };
 
+function changeCharInString(s: string, char: string, pos: number) {
+    return s.slice(0, pos) + char + s.slice(pos+1, s.length);
+}
+
 class App extends Component<any, IndexState> {
-    private bopomofo_list: Array<注音> = [];
+    // 記錄被使用者手動選定的字
+    private hand_chosen_table: { [pos: number]: string } = {};
 
     constructor(props: any) {
         super(props);
         this.state = {
-            txt_content: "",
+            input_unit_list: [],
+            txt_bopomofo_content: "",
+            txt_final_content_list: [],
+            txt_typing_content: ""
         };
         this.handleKeyPress = this.handleKeyPress.bind(this);
     }
     async handleKeyPress(evt: React.KeyboardEvent<HTMLTextAreaElement>) {
+        let input_unit_list = [...this.state.input_unit_list];
         if(evt.keyCode == 8) {
             console.log("backspace");
-            this.bopomofo_list.slice(0, bopomofo_list.length-1);
         } else {
             let char = String.fromCharCode(evt.charCode);
             if(char in BOPOMOFO_TABLE) {
-                let bopomofo = new 注音();
+                let bopomofo = new 輸入單元();
                 bopomofo.值 = BOPOMOFO_TABLE[char];
-                this.bopomofo_list.push(bopomofo);
+                bopomofo.種類 = 輸入單元種類.注音;
+                input_unit_list.push(bopomofo);
             }
         }
-        let txt_content = this.bopomofo_list.reduce((str, bopomofo) => str + bopomofo.值, "");
-        this.setState({ txt_content });
+        this.setState({ input_unit_list });
         let resp = await fetch("/determine-sequence", {
             method: "post",
             headers: {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({
-                sequence: this.bopomofo_list
+                input_unit_seq: input_unit_list
             })
         });
-        let data: { determined_sequence: Array<注音> } = await resp.json();
-        //this.bopomofo_list = data.determined_sequence;
-        //txt_content = this.bopomofo_list.reduce((str, bopomofo) => str + bopomofo.值, "");
-        //this.setState({ txt_content });
+        let data: { grouped_seq: Array<選字單元>, determined_seq: string } = await resp.json();
+        this.setState({ txt_typing_content: data.determined_seq });
+        this.setState({ grouped_seq: data.grouped_seq });
     }
     render() {
+        let txt_bopomofo_content = this.state.input_unit_list.reduce((str, bopomofo) => str + bopomofo.值, "");
         return (
             <div>
                 <textarea placeholder="超級輸入法" style={{
-                    width: 600,
-                    height: 500
-                }} onKeyPress={this.handleKeyPress} value={this.state.txt_content}></textarea>
+                    width: 1000,
+                    fontSize: 20
+                }} onKeyPress={this.handleKeyPress} value={txt_bopomofo_content}></textarea>
+                <div>
+                    {
+                        this.state.txt_final_content_list.map(ctx => {
+                            return <div>{ctx}</div>;
+                        })
+                    }
+                    <div>{this.state.txt_typing_content}</div>
+                </div>
             </div>
         );
     }
