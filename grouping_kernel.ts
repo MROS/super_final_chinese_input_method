@@ -1,25 +1,9 @@
-import { 輸入單元種類, 聲調列舉, GroupMethod, 注音表示類, 輸入單元, 選字單元, 選字單元種類 } from "./basic"
-
-enum 注音種類列舉 {
-    聲母, 韻母, 介音, 聲調, 無
-};
+import { 輸入單元種類, 聲調列舉, GroupMethod, 注音表示類, 輸入單元, 選字單元, 選字單元種類, 注音種類列舉, toneCharToEnum  } from "./basic"
 
 const 聲母表 = "ㄍㄎㄫㄐㄑㄬㄉㄊㄋㄅㄆㄇㄈㄪㄗㄘㄙㄓㄔㄕㄏㄒㄌㄖ";
 const 韻母表 = "ㄚㄛㄝㄟㄞㄠㄡㄢㄤㄣㄥㄦ";
 const 介音表 = "ㄧㄨㄩ";
 const 聲調表 = " ˊˇˋ˙ ";
-
-function toneCharToEnum(char) {
-    if(char == " ") {
-        return 聲調列舉.一;
-    } else if(char == "ˊ") {
-        return 聲調列舉.二;
-    } else if(char == "ˇ") {
-        return 聲調列舉.三;
-    } else if(char == "ˋ") {
-        return 聲調列舉.四;
-    }
-}
 
 export class GroupingKernel {
     static assignGroup(input_unit_list: Array<輸入單元>): Array<選字單元> {
