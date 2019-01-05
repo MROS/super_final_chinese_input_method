@@ -5,3 +5,7 @@
 npm-debug.log
 **/.cache/**
 target/
+*.csv
+*.npy
+*.h5
+*.pyc
