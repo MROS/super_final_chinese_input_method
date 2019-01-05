@@ -7,10 +7,14 @@ class CharDB:
     def __init__(self, char_file_name):
         self.char_file_name = char_file_name
         self.article = ""
+        self.val_article = ""
         self.genBopomofoDict()
     def readArticle(self, filename):
+        article = ""
         with open(filename) as f:
-            self.article += f.read() + "\n"
+            article = f.read()
+        self.article += article[:-1000] + "\n"
+        self.val_article += article[-1000+1:] + "\n"
 
     def genBopomofoDict(self):
         json_data = None
@@ -55,6 +59,9 @@ class CharDB:
     def loadWE(self, dict_name="ch_id_dict.npy", mat_name="we_mat.npy"):
         self.ch_id_dict = np.load(dict_name).item()
         self.we_mat = np.load(mat_name)
+        self.id_ch_dict = {}
+        for ch in self.ch_id_dict:
+            self.id_ch_dict[self.ch_id_dict[ch]] = ch
     
     def chars2Idxs(self, s, target=-1, arr_len=5):
         arr_idx = []
@@ -65,7 +72,7 @@ class CharDB:
                 arr_idx.append(self.ch_id_dict["__pad__"])
             elif(s[i] not in self.ch_id_dict):
                 # Not supposed to happen
-                raise Exception("Unknown")
+                # raise Exception("Unknown")
                 arr_idx.append(self.ch_id_dict["__unknown__"])
             else:
                 arr_idx.append(self.ch_id_dict[s[i]])
@@ -81,7 +88,6 @@ class CharDB:
                     line = line[target + 1:]
                     target = 0
                     continue
-                arr_idx = []
                 mat_Y.append(self.ch_id_dict[line[target]])
                 mat_X.append(self.chars2Idxs(line, target=target, arr_len=arr_len))
                 target += 1
