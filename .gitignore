@@ -9,3 +9,6 @@ target/
 *.npy
 *.h5
 *.pyc
+
+downloader/*.txt
+downloader/*.epub
