@@ -35,11 +35,11 @@ with tf.device("/gpu:0"):
     model.add(Dense(char_db.getCharCount(), activation='softmax'))
     model.summary()
 
-    model.compile(loss='binary_crossentropy',
+    model.compile(loss="categorical_crossentropy",
                        optimizer= 'adam',
                        metrics=(['accuracy']))
     
     early_stopping = EarlyStopping(monitor='val_loss', min_delta=0, patience=10, verbose=0, mode="auto")
-    checkpt = ModelCheckpoint("ckpt_model.h5", monitor="val_acc", verbose=0, save_best_only=True, save_weights_only=False, mode="auto", period=1)
+    checkpt = ModelCheckpoint('ckpt/model-{epoch:05d}-{val_acc:.5f}.h5', monitor='val_acc', save_best_only=True, period=1)
     history = model.fit(train_X, train_Y,
-              batch_size=1024, epochs=50, validation_data=(val_X, val_Y), callbacks=[early_stopping,checkpt])
+              batch_size=1024, epochs=50, validation_data=(val_X, val_Y), callbacks=[checkpt, early_stopping])

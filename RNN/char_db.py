@@ -55,32 +55,36 @@ class CharDB:
     def loadWE(self, dict_name="ch_id_dict.npy", mat_name="we_mat.npy"):
         self.ch_id_dict = np.load(dict_name).item()
         self.we_mat = np.load(mat_name)
+    
+    def chars2Idxs(self, s, target=-1, arr_len=5):
+        arr_idx = []
+        if(target == -1):
+            target = len(s)
+        for i in range(target - arr_len, target):
+            if(i < 0):
+                arr_idx.append(self.ch_id_dict["__pad__"])
+            elif(s[i] not in self.ch_id_dict):
+                # Not supposed to happen
+                raise Exception("Unknown")
+                arr_idx.append(self.ch_id_dict["__unknown__"])
+            else:
+                arr_idx.append(self.ch_id_dict[s[i]])
+        return arr_idx
 
     def chars2XandY(self, s, arr_len=5):
         mat_X = []
         mat_Y = []
         for line in str.split(s, "\n"):
-            #print(line)
-            front = -arr_len
-            while(front + arr_len < len(line)):
-                if(not line[front + arr_len] in self.ch_id_dict):
-                    line = line[front + arr_len + 1:]
-                    front = -arr_len
+            target = 0
+            while(target < len(line)):
+                if(not line[target] in self.ch_id_dict):
+                    line = line[target + 1:]
+                    target = 0
                     continue
                 arr_idx = []
-                mat_Y.append(self.ch_id_dict[line[front + arr_len]])
-                for i in range(front, front + arr_len):
-                    idx, ch = self.ch_id_dict["__unknown__"], None
-                    if(i < 0):
-                        idx = self.ch_id_dict["__pad__"]
-                    elif(line[i] in self.ch_id_dict):
-                        idx = self.ch_id_dict[line[i]]
-                        #print(line[i])
-                    arr_idx.append(idx)
-                #print("Ans: " + line[front + arr_len])
-                #print("====")
-                mat_X.append(arr_idx)
-                front += 1
+                mat_Y.append(self.ch_id_dict[line[target]])
+                mat_X.append(self.chars2Idxs(line, target=target, arr_len=arr_len))
+                target += 1
         return np.matrix(mat_X), self.idx2OneHot(mat_Y)
     
     def idx2OneHot(self, mat_idx):
