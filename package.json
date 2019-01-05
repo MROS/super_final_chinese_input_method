@@ -6,7 +6,9 @@
   "dependencies": {
     "@types/express": "^4.16.0",
     "@types/node": "^10.12.18",
+    "axios": "^0.18.0",
     "express": "^4.16.4",
+    "jsdom": "^13.1.0",
     "typescript": "^3.2.2"
   },
   "devDependencies": {},
