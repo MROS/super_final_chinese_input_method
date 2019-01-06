@@ -14,7 +14,7 @@
   "devDependencies": {},
   "scripts": {
     "start": "tsc; node target/server.js",
-    "test": "tsc; node target/testing/testing.js"
+    "test": "tsc; node target/testing/testing.js testing/bench_bopomofo.txt testing/bench.txt"
   },
   "repository": {
     "type": "git",
