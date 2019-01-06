@@ -55,10 +55,10 @@ app.post("/get-candidate", async function(req, res) {
 	let grouped_seq = GroupingKernel.assignGroup(input_unit_seq);
 	grouped_seq = getSelectedSequence(grouped_seq, query.hand_chosen_table);
 	console.log(grouped_seq);
-	let candidate = ["測", "驗"];
+	console.log(query.pos);
 
 	res.json({
-		candidate
+		candidate: kernel.getCandidate(grouped_seq, query.pos)
 	});
 	
 });
