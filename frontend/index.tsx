@@ -8,6 +8,7 @@ import { 輸入單元, 輸入單元種類, 選字單元 } from "../basic"
 
 type IndexState = {
     input_unit_list: Array<輸入單元>,
+    txt_bopomofo_content: string,
     txt_final_content_list: Array<string>,
     txt_typing_content: string,
     grouped_seq: Array<選字單元> // 全都是注音表示
@@ -27,7 +28,8 @@ class App extends Component<any, IndexState> {
             input_unit_list: [],
             txt_bopomofo_content: "",
             txt_final_content_list: [],
-            txt_typing_content: ""
+            txt_typing_content: "",
+            grouped_seq: [],
         };
         this.handleKeyPress = this.handleKeyPress.bind(this);
     }
