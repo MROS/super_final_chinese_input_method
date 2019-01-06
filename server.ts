@@ -54,9 +54,6 @@ app.post("/get-candidate", async function(req, res) {
 	let input_unit_seq = query.input_unit_seq;
 	let grouped_seq = GroupingKernel.assignGroup(input_unit_seq);
 	grouped_seq = getSelectedSequence(grouped_seq, query.hand_chosen_table);
-	console.log(grouped_seq);
-	console.log(query.pos);
-
 	res.json({
 		candidate: kernel.getCandidate(grouped_seq, query.pos)
 	});
