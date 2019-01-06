@@ -67,7 +67,7 @@ export function toneCharToEnum(char) {
     }
 }
 
-const 聲母集 = new Set<string>([
+export const 聲母集 = new Set<string>([
     "ㄅ", "ㄆ", "ㄇ", "ㄈ", "ㄉ",
     "ㄊ", "ㄋ", "ㄌ", "ㄍ", "ㄎ",
     "ㄏ", "ㄐ", "ㄑ", "ㄒ", "ㄓ",
@@ -75,18 +75,18 @@ const 聲母集 = new Set<string>([
     "ㄙ"
 ]);
 
-const 介音集 = new Set<string>([
+export const 介音集 = new Set<string>([
     "ㄧ", "ㄨ", "ㄩ"
 ]);
 
-const 韻母集 = new Set<string>([
+export const 韻母集 = new Set<string>([
     "ㄚ", "ㄛ", "ㄜ", "ㄝ", "ㄞ",
     "ㄟ", "ㄠ", "ㄡ", "ㄢ", "ㄣ",
     "ㄤ", "ㄥ", "ㄦ"
 ]);
 
-const 聲調集 = new Set<string>([
-    "ˊ", "ˇ", "ˋ", "˙"
+export const 聲調集 = new Set<string>([
+    "ˊ", "ˇ", "ˋ", "˙", " "
 ]);
 
 function 字串轉注音種類列舉(s: string): 注音種類列舉 {
@@ -131,7 +131,6 @@ export function isValidBopomofo(s: string): boolean {
         字串轉注音表示類(s);
         return true;
     } catch (error) {
-        // console.error(error);
         return false;
     }
 }

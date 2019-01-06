@@ -180,6 +180,7 @@ class HMMKernel implements InputKernel {
                 console.log(`count best prev. prev: ${prevChar}, cur: ${char}, prevProb: ${prevM.get(prevChar).prob}, trans prob: ${transProb}`);
 
                 // TODO: 避免轉移矩陣爲零，加入 initMatrix 平滑化
+                prob += 0.1 * getMap(char, this.initMatrix);
                 
                 if (prob > max) {
                     max = prob;
