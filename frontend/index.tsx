@@ -37,6 +37,21 @@ class App extends Component<any, IndexState> {
         this.handleKeyPress = this.handleKeyPress.bind(this);
         this.selectChar = this.selectChar.bind(this);
     }
+    async determineSeq(input_unit_list: Array<輸入單元>) {
+        let resp = await fetch("/determine-sequence", {
+            method: "post",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                input_unit_seq: input_unit_list,
+                hand_chosen_table: this.hand_chosen_table,
+            })
+        });
+        let data: { grouped_seq: Array<選字單元>, determined_seq: string } = await resp.json();
+        this.setState({ txt_typing_content: data.determined_seq });
+        this.setState({ grouped_seq: data.grouped_seq });
+    }
     async handleKeyPress(evt: React.KeyboardEvent<HTMLTextAreaElement>) {
         let input_unit_list = [...this.state.input_unit_list];
         if(evt.keyCode == 8) {
@@ -51,27 +66,35 @@ class App extends Component<any, IndexState> {
             }
         }
         this.setState({ input_unit_list });
-        let resp = await fetch("/determine-sequence", {
-            method: "post",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                input_unit_seq: input_unit_list
-            })
-        });
-        let data: { grouped_seq: Array<選字單元>, determined_seq: string } = await resp.json();
-        this.setState({ txt_typing_content: data.determined_seq });
-        this.setState({ grouped_seq: data.grouped_seq });
+        this.determineSeq(input_unit_list);
     }
-    startSelectChar(pos: number) {
-        this.setState({ selecting_pos: pos, candidates: [] });
-        this.setState({ candidates: ["測", "試"] });
+    async startSelectChar(pos: number) {
+        if(pos == this.state.selecting_pos) {
+            this.setState({ selecting_pos: -1, candidates: [] });
+        }
+        else {
+            this.setState({ selecting_pos: pos, candidates: [] });
+            // this.setState({ candidates: ["測", "試"] });
+            let resp = await fetch("/get-candidate", {
+                method: "post",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    input_unit_seq: this.state.input_unit_list,
+                    hand_chosen_table: this.hand_chosen_table,
+                    pos
+                })
+            });
+            let data: { candidate: Array<string> } = await resp.json();
+            this.setState({ candidates: data.candidate });
+        }
     }
     selectChar(pos: number, idx: number) {
         this.hand_chosen_table[pos] = this.state.candidates[idx];
         this.setState({ selecting_pos: -1, candidates: [] });
         console.log(this.hand_chosen_table);
+        this.determineSeq(this.state.input_unit_list);
     }
     render() {
         let txt_bopomofo_content = this.state.input_unit_list.reduce((str, bopomofo) => str + bopomofo.值, "");
