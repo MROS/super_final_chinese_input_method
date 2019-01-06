@@ -13,7 +13,8 @@
   },
   "devDependencies": {},
   "scripts": {
-    "start": "tsc; node target/server.js"
+    "start": "tsc; node target/server.js",
+    "test": "tsc; node target/testing/testing.js"
   },
   "repository": {
     "type": "git",
