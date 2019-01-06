@@ -10,8 +10,10 @@ type IndexState = {
     input_unit_list: Array<輸入單元>,
     txt_bopomofo_content: string,
     txt_final_content_list: Array<string>,
-    txt_typing_content: string,
-    grouped_seq: Array<選字單元> // 全都是注音表示
+    txt_typing_content: Array<string>,
+    grouped_seq: Array<選字單元>, // 全都是注音表示
+    selecting_pos: number,
+    candidates: Array<string>,
 };
 
 function changeCharInString(s: string, char: string, pos: number) {
@@ -28,10 +30,12 @@ class App extends Component<any, IndexState> {
             input_unit_list: [],
             txt_bopomofo_content: "",
             txt_final_content_list: [],
-            txt_typing_content: "",
+            txt_typing_content: [],
             grouped_seq: [],
+            selecting_pos: -1
         };
         this.handleKeyPress = this.handleKeyPress.bind(this);
+        this.selectChar = this.selectChar.bind(this);
     }
     async handleKeyPress(evt: React.KeyboardEvent<HTMLTextAreaElement>) {
         let input_unit_list = [...this.state.input_unit_list];
@@ -60,6 +64,15 @@ class App extends Component<any, IndexState> {
         this.setState({ txt_typing_content: data.determined_seq });
         this.setState({ grouped_seq: data.grouped_seq });
     }
+    startSelectChar(pos: number) {
+        this.setState({ selecting_pos: pos, candidates: [] });
+        this.setState({ candidates: ["測", "試"] });
+    }
+    selectChar(pos: number, idx: number) {
+        this.hand_chosen_table[pos] = this.state.candidates[idx];
+        this.setState({ selecting_pos: -1, candidates: [] });
+        console.log(this.hand_chosen_table);
+    }
     render() {
         let txt_bopomofo_content = this.state.input_unit_list.reduce((str, bopomofo) => str + bopomofo.值, "");
         return (
@@ -74,11 +87,53 @@ class App extends Component<any, IndexState> {
                             return <div>{ctx}</div>;
                         })
                     }
-                    <div>{this.state.txt_typing_content}</div>
+                    <div>
+                        {
+                            this.state.txt_typing_content.map((ch, i) => {
+                                return (
+                                    <div key={i} style={{ display: "inline-block", position: "relative" }}>
+                                        <span key={i} style={{ cursor: "pointer", marginTop: -1 }}
+                                            onClick={this.startSelectChar.bind(this, i)}>{ch}</span>
+                                        {
+                                            (() => {
+                                                if(i == this.state.selecting_pos && this.state.candidates.length) {
+                                                    return <SelectBlock
+                                                        onSelect={this.selectChar.bind(this, i)}
+                                                        candidates={this.state.candidates}/>;
+                                                }
+                                            })()
+                                        }
+                                    </div>
+                                );
+                            })
+                        }
+                    </div>
                 </div>
             </div>
         );
     }
 }
 
+type SelectBlockProps = {
+    candidates: Array<string>,
+    onSelect: number => void
+}
+
+class SelectBlock extends Component<SelectBlockProps, any> {
+    render() {
+        return (
+            <div style={{ position: "absolute", fontSize: 20, top: 12, left: 0, padding: 10, , backgroundColor: "rgba(200, 255, 255, 0.9)" }}>
+                {
+                    this.props.candidates.map((ch, i) => {
+                        return (
+                            <div key={i} className="candidate-txt" onClick={() => this.props.onSelect(i)}>
+                                1.{ch}
+                            </div>
+                        );
+                    })
+                }
+            </div>
+        );
+    }
+}
 render(<App />, document.getElementById("root"))

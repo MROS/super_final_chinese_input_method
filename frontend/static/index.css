@@ -1,0 +1,6 @@
+.candidate-txt {
+    cursor: pointer;
+}
+.candidate-txt:hover {
+    color: "pink";
+}
