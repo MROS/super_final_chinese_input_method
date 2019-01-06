@@ -1,4 +1,5 @@
 import json
+import re
 
 from gensim.models import Word2Vec
 import numpy as np
@@ -29,7 +30,9 @@ class CharDB:
             bopomofo_list = []
             for heteronym in char_info["heteronyms"]:
                 if("bopomofo" in heteronym):
-                    bopomofo_list.append(heteronym["bopomofo"])
+                    bopomofo = heteronym["bopomofo"]
+                    bopomofo = re.sub(r"（\w+） *", "", bopomofo)
+                    bopomofo_list.append(bopomofo)
                     has_bopomofo = True
             if has_bopomofo:  # only those with bopomofo need to be in the list
                 self.bopomofo_dict[char_info["title"]] = bopomofo_list

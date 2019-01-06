@@ -66,3 +66,77 @@ export function toneCharToEnum(char) {
         return 聲調列舉.輕;
     }
 }
+
+const 聲母集 = new Set<string>([
+    "ㄅ", "ㄆ", "ㄇ", "ㄈ", "ㄉ",
+    "ㄊ", "ㄋ", "ㄌ", "ㄍ", "ㄎ",
+    "ㄏ", "ㄐ", "ㄑ", "ㄒ", "ㄓ",
+    "ㄔ", "ㄕ", "ㄖ", "ㄗ", "ㄘ",
+    "ㄙ"
+]);
+
+const 介音集 = new Set<string>([
+    "ㄧ", "ㄨ", "ㄩ"
+]);
+
+const 韻母集 = new Set<string>([
+    "ㄚ", "ㄛ", "ㄜ", "ㄝ", "ㄞ",
+    "ㄟ", "ㄠ", "ㄡ", "ㄢ", "ㄣ",
+    "ㄤ", "ㄥ", "ㄦ"
+]);
+
+const 聲調集 = new Set<string>([
+    "ˊ", "ˇ", "ˋ", "˙"
+]);
+
+function 字串轉注音種類列舉(s: string): 注音種類列舉 {
+    if (聲母集.has(s)) { return 注音種類列舉.聲母; }
+    if (介音集.has(s)) { return 注音種類列舉.介音; }
+    if (韻母集.has(s)) { return 注音種類列舉.韻母; }
+    if (聲調集.has(s)) { return 注音種類列舉.聲調; }
+    return null;
+}
+
+// TODO: 檢查不合法
+function 字串轉注音表示類(s: string): 注音表示類 {
+    let ret = new 注音表示類();
+    for (let c of s) {
+        switch (字串轉注音種類列舉(c)) {
+            case 注音種類列舉.聲母: {
+                ret.聲母 = c;
+                break;
+            }
+            case 注音種類列舉.介音: {
+                ret.介音 = c;
+                break;
+            }
+            case 注音種類列舉.韻母: {
+                ret.韻母 = c;
+                break;
+            }
+            case 注音種類列舉.聲調: {
+                ret.聲調 = toneCharToEnum(c);
+                break;
+            }
+            default: {
+                throw Error(`${c} 並非注音符號`)
+            }
+        }
+    }
+    return ret;
+}
+
+export function isValidBopomofo(s: string): boolean {
+    try {
+        字串轉注音表示類(s);
+        return true;
+    } catch (error) {
+        // console.error(error);
+        return false;
+    }
+}
+
+// 發現原字典檔中，輕聲的符號會寫在前面，其他聲調則寫在後面，故需要正規化
+export function normalizeBopomofo(s: string): string {
+    return 字串轉注音表示類(s).toString();
+}
