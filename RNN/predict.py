@@ -55,7 +55,8 @@ def predictSeqAt(target, bopomofo_seq, prefix_seq, offset, selected_dict):
         max_postfix = ""
         max_prob = - 1
         
-        if(target != 0 and max(prob_list)[0] > 0.05): # fast cut ?
+        if(target != 0 and len(prob_list) > 0 and max(prob_list)[0] > 0.05):
+            # fast cut ?
             prob_list = [max(prob_list)]
 
         for (prob, ch) in prob_list:
@@ -81,7 +82,7 @@ def predictSeq(bopomofo_seq, selected_dict={}):
     return prefix
 
         
-s = "init"
+'''s = "init"
 print("go")
 sys.stdout.flush()
 
@@ -131,3 +132,4 @@ while(True):
     print(ch)
     sys.stdout.flush()
     
+'''
