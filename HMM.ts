@@ -10,7 +10,6 @@ import {
 import { Dictionary, getDictionary } from "./pre_process";
 
 import { InputKernel } from "./input_kernel";
-import { stringify } from "querystring";
 
 // 抓取整個目錄底下的 txt 檔，並轉換爲 Array<string> ，其中的 string 全部爲字典中的漢字
 function getSentences(dir: string, dictionary: Dictionary) {
@@ -134,7 +133,21 @@ class HMMKernel implements InputKernel {
         console.log(`訓練資料共包含 ${n} 不同漢字`);
     }
 
-    determineSequence(input: Array<選字單元>, groupMethod: GroupMethod): Array<string> {
+    private getBest(m: Map<string, ProbPrev>): string {
+        let max = -1;
+        let ret;
+        console.log(Array.from(m.keys()));
+        for (let key of m.keys()) {
+            let v = m.get(key);
+            if (v.prob > max) {
+                max = v.prob;
+                ret = key;
+            }
+        }
+        return ret;
+    }
+
+    private getMaxProb(input: Array<選字單元>): Array<Map<string, ProbPrev>> {
         if (input.length == 0) {
             return [];
         }
@@ -156,20 +169,6 @@ class HMMKernel implements InputKernel {
 
         }
 
-        function getBest(m: Map<string, ProbPrev>): string {
-            let max = -1;
-            let ret;
-            console.log(Array.from(m.keys()));
-            for (let key of m.keys()) {
-                let v = m.get(key);
-                // console.log(`${key}: ${JSON.stringify(v)}`);
-                if (v.prob > max) {
-                    max = v.prob;
-                    ret = key;
-                }
-            }
-            return ret;
-        }
 
         let getBestPrev = (prevM: Map<string, ProbPrev>, char: string): ProbPrev => {
             let max = -1;
@@ -177,10 +176,10 @@ class HMMKernel implements InputKernel {
             for (let prevChar of prevM.keys()) {
                 let transProb = get2dMap(prevChar, char, this.transMatrix);
                 let prob = transProb * prevM.get(prevChar).prob;
-                console.log(`count best prev. prev: ${prevChar}, cur: ${char}, prevProb: ${prevM.get(prevChar).prob}, trans prob: ${transProb}`);
+                console.log(`count best prev. prev: ${prevChar}, cur: ${char}, prevProb: ${prevM.get(prevChar).prob}, trans prob: ${transProb}, cur init: ${getMap(char, this.initMatrix)}`);
 
                 // TODO: 避免轉移矩陣爲零，加入 initMatrix 平滑化
-                prob += 0.1 * getMap(char, this.initMatrix);
+                prob += 0.00001 * (getMap(char, this.initMatrix) + 0.1 * prevM.get(prevChar).prob);
                 
                 if (prob > max) {
                     max = prob;
@@ -198,10 +197,10 @@ class HMMKernel implements InputKernel {
 
             if (input[i].種類 == 選字單元種類.漢字) {
 
-                let prev = getBest(maxProb[i - 1]);
+                let prev = this.getBest(maxProb[i - 1]);
                 maxProb[i].set(<string>input[i].值, new ProbPrev(1, prev));
 
-            } else if (input[0].種類 == 選字單元種類.注音表示) {
+            } else if (input[i].種類 == 選字單元種類.注音表示) {
 
                 let s = (<注音表示類>input[i].值).toString();
                 let probableChars = this.dictionary.getByCompleteBopomofo(s);
@@ -212,23 +211,63 @@ class HMMKernel implements InputKernel {
             }
         }
         console.log("維特比算法結束");
-
         console.log(`長度：${input.length}`);
+        return maxProb;
+    }
+
+    determineSequence(input: Array<選字單元>, groupMethod: GroupMethod): Array<string> {
+        if (input.length == 0) {
+            return [];
+        }
+
+        let maxProb = this.getMaxProb(input);
+
         // 從最後一個拿 prev 回去
         let ret = [];
-        let cur = getBest(maxProb[input.length - 1]);
+        let cur = this.getBest(maxProb[input.length - 1]);
         console.log(cur);
         ret.push(cur);
         for (let i = input.length - 1; i > 0; i--) {
            cur = maxProb[i].get(cur).prev; 
-            console.log(cur);
+           console.log(cur);
            ret.push(cur);
         }
 
         return ret.reverse();
     }
-    getCandidate(input: Array<選字單元>, range: [number, number]): Array<string> {
-        return [];
+    getCandidate(input: Array<選字單元>, n: number): Array<string> {
+        if (input.length <= n) {
+            return [];
+        }
+        let maxProb = this.getMaxProb(input.slice(0, n + 1));
+
+        // 本來就是漢字，不用再給候選
+        if (input[n].種類 == 選字單元種類.漢字) {
+
+            return [<string>input[n].值]
+
+        } else if (input[n].種類 == 選字單元種類.注音表示) {
+
+            let s = (<注音表示類>input[n].值).toString();
+            let probableChars = this.dictionary.getByCompleteBopomofo(s);
+
+            let bestChar = this.getBest(maxProb[n]);
+            console.log(`best char is ${bestChar}`);
+            let lastBestChar = maxProb[n].get(bestChar).prev;
+            console.log(`last best char is ${lastBestChar}`);
+
+            let countTransProb = (c) => {
+                return get2dMap(lastBestChar, c, this.transMatrix) + 0.1 * getMap(c, this.initMatrix);
+            }
+
+            let ret = probableChars.sort((c1, c2) => {
+                return countTransProb(c2) - countTransProb(c1);
+            });
+
+            return ret;
+
+        }
+
     }
 
 }
