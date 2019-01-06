@@ -7,6 +7,7 @@ import { GroupingKernel } from "../grouping_kernel";
 
 const bopomofo_filename = process.argv[2];
 const ans_filename = process.argv[3];
+const out_filename = "testing/out.txt";
 
 const dictionary = getDictionary();
 const sentences = getSentences("./downloader", dictionary);
@@ -40,7 +41,7 @@ fs.readFile(ans_filename, (err, data) => {
         let array_bopomofo = data.toString().split(/, */);
 
         const DATA_OFFSET = 0;
-        const DATA_N = 100;
+        const DATA_N = 500;
         array_ans = array_ans.slice(DATA_OFFSET, DATA_OFFSET + DATA_N);
         array_bopomofo = array_bopomofo.slice(0, DATA_OFFSET + DATA_N);
 
@@ -61,6 +62,8 @@ fs.readFile(ans_filename, (err, data) => {
                 }
             }
             miss_rate[i] = miss[i] / len[i];
+            fs.appendFileSync(out_filename, array_predict[i] + "\n");
+            fs.appendFileSync(out_filename, array_ans[i] + "\n");
         }
 
         const sum = a => a.reduce((x, y) => x+y, 0);
